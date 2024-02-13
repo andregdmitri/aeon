@@ -12,8 +12,6 @@ __all__ = [
 import gc
 from copy import deepcopy
 
-from sklearn.utils import check_random_state
-
 from aeon.classification.deep_learning.base import BaseDeepClassifier
 from aeon.networks import TapNetNetwork
 
@@ -61,8 +59,6 @@ class TapNetClassifier(BaseDeepClassifier):
         whether to use a CNN layer
     verbose : bool, default = False
         whether to output extra information
-    random_state : int or None, default = None
-        seed for random
 
     Attributes
     ----------
@@ -106,7 +102,6 @@ class TapNetClassifier(BaseDeepClassifier):
         use_att=True,
         use_lstm=True,
         use_cnn=True,
-        random_state=None,
         padding="same",
         loss="binary_crossentropy",
         optimizer=None,
@@ -141,7 +136,6 @@ class TapNetClassifier(BaseDeepClassifier):
 
         super().__init__(
             batch_size=batch_size,
-            random_state=random_state,
         )
 
         self._network = TapNetNetwork(
@@ -155,7 +149,6 @@ class TapNetClassifier(BaseDeepClassifier):
             use_att=self.use_att,
             use_lstm=self.use_lstm,
             use_cnn=self.use_cnn,
-            random_state=self.random_state,
             padding=self.padding,
         )
 
@@ -178,10 +171,7 @@ class TapNetClassifier(BaseDeepClassifier):
         -------
         output: a compiled Keras model
         """
-        import tensorflow as tf
         from tensorflow import keras
-
-        tf.random.set_seed(self.random_state)
 
         if self.metrics is None:
             metrics = ["accuracy"]
@@ -227,7 +217,6 @@ class TapNetClassifier(BaseDeepClassifier):
         # Transpose to conform to expectation format by keras
         X = X.transpose(0, 2, 1)
 
-        check_random_state(self.random_state)
         self.input_shape = X.shape[1:]
         self.model_ = self.build_model(self.input_shape, self.n_classes_)
         if self.verbose:

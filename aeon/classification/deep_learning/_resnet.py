@@ -8,8 +8,6 @@ import os
 import time
 from copy import deepcopy
 
-from sklearn.utils import check_random_state
-
 from aeon.classification.deep_learning.base import BaseDeepClassifier
 from aeon.networks import ResNetNetwork
 
@@ -120,7 +118,6 @@ class ResNetClassifier(BaseDeepClassifier):
         metrics=None,
         batch_size=64,
         use_mini_batch_size=False,
-        random_state=None,
         file_path="./",
         save_best_model=False,
         save_last_model=False,
@@ -153,7 +150,6 @@ class ResNetClassifier(BaseDeepClassifier):
 
         super().__init__(
             batch_size=batch_size,
-            random_state=random_state,
             last_file_name=last_file_name,
         )
 
@@ -167,7 +163,6 @@ class ResNetClassifier(BaseDeepClassifier):
             activation=self.activation,
             dilation_rate=self.dilation_rate,
             padding=self.padding,
-            random_state=random_state,
         )
 
     def build_model(self, input_shape, n_classes, **kwargs):
@@ -190,8 +185,6 @@ class ResNetClassifier(BaseDeepClassifier):
         output : a compiled Keras Model
         """
         import tensorflow as tf
-
-        tf.random.set_seed(self.random_state)
 
         self.optimizer_ = (
             tf.keras.optimizers.Adam(learning_rate=0.01)
@@ -238,8 +231,6 @@ class ResNetClassifier(BaseDeepClassifier):
         y_onehot = self.convert_y_to_keras(y)
         # Transpose to conform to Keras input style.
         X = X.transpose(0, 2, 1)
-
-        check_random_state(self.random_state)
 
         self.input_shape = X.shape[1:]
         self.training_model_ = self.build_model(self.input_shape, self.n_classes_)

@@ -8,8 +8,6 @@ import os
 import time
 from copy import deepcopy
 
-from sklearn.utils import check_random_state
-
 from aeon.classification.deep_learning.base import BaseDeepClassifier
 from aeon.networks import MLPNetwork
 
@@ -25,8 +23,6 @@ class MLPClassifier(BaseDeepClassifier):
         the number of epochs to train the model
     batch_size : int, default = 16
         the number of samples per gradient update.
-    random_state : int or None, default=None
-        Seed for random number generation.
     verbose : boolean, default = False
         whether to output extra information
     loss : string, default="mean_squared_error"
@@ -94,7 +90,6 @@ class MLPClassifier(BaseDeepClassifier):
         save_last_model=False,
         best_file_name="best_model",
         last_file_name="last_model",
-        random_state=None,
         activation="sigmoid",
         use_bias=True,
         optimizer=None,
@@ -116,13 +111,10 @@ class MLPClassifier(BaseDeepClassifier):
 
         super().__init__(
             batch_size=batch_size,
-            random_state=random_state,
             last_file_name=last_file_name,
         )
 
-        self._network = MLPNetwork(
-            random_state=self.random_state,
-        )
+        self._network = MLPNetwork()
 
     def build_model(self, input_shape, n_classes, **kwargs):
         """Construct a compiled, un-trained, keras model that is ready for training.
@@ -143,10 +135,7 @@ class MLPClassifier(BaseDeepClassifier):
         -------
         output : a compiled Keras Model
         """
-        import tensorflow as tf
         from tensorflow import keras
-
-        tf.random.set_seed(self.random_state)
 
         if self.metrics is None:
             metrics = ["accuracy"]
@@ -189,8 +178,6 @@ class MLPClassifier(BaseDeepClassifier):
         y_onehot = self.convert_y_to_keras(y)
         # Transpose to conform to Keras input style.
         X = X.transpose(0, 2, 1)
-
-        check_random_state(self.random_state)
 
         self.input_shape = X.shape[1:]
         self.training_model_ = self.build_model(self.input_shape, self.n_classes_)

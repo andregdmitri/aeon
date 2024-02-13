@@ -8,8 +8,6 @@ import os
 import time
 from copy import deepcopy
 
-from sklearn.utils import check_random_state
-
 from aeon.classification.deep_learning.base import BaseDeepClassifier
 from aeon.networks import CNNNetwork
 
@@ -48,8 +46,6 @@ class CNNClassifier(BaseDeepClassifier):
     use_bias : bool or list of bool, default = True
         Condition on whether to use bias values for convolution layers,
         if not a list, the same condition is used for all layers.
-    random_state : int, default = 0
-        Seed to any needed random actions.
     n_epochs : int, default = 2000
         The number of epochs to train the model.
     batch_size : int, default = 16
@@ -120,7 +116,6 @@ class CNNClassifier(BaseDeepClassifier):
         verbose=False,
         loss="mean_squared_error",
         metrics=None,
-        random_state=None,
         use_bias=True,
         optimizer=None,
     ):
@@ -149,7 +144,6 @@ class CNNClassifier(BaseDeepClassifier):
 
         super().__init__(
             batch_size=batch_size,
-            random_state=random_state,
             last_file_name=last_file_name,
         )
 
@@ -163,7 +157,6 @@ class CNNClassifier(BaseDeepClassifier):
             strides=self.strides,
             dilation_rate=self.dilation_rate,
             use_bias=self.use_bias,
-            random_state=self.random_state,
         )
 
     def build_model(self, input_shape, n_classes, **kwargs):
@@ -186,8 +179,6 @@ class CNNClassifier(BaseDeepClassifier):
         output : a compiled Keras Model
         """
         import tensorflow as tf
-
-        tf.random.set_seed(self.random_state)
 
         if self.metrics is None:
             metrics = ["accuracy"]
@@ -231,8 +222,6 @@ class CNNClassifier(BaseDeepClassifier):
         y_onehot = self.convert_y_to_keras(y)
         # Transpose to conform to Keras input style.
         X = X.transpose(0, 2, 1)
-
-        check_random_state(self.random_state)
 
         self.input_shape = X.shape[1:]
         self.training_model_ = self.build_model(self.input_shape, self.n_classes_)

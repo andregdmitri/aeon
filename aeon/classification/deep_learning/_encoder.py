@@ -8,8 +8,6 @@ import os
 import time
 from copy import deepcopy
 
-from sklearn.utils import check_random_state
-
 from aeon.classification.deep_learning.base import BaseDeepClassifier
 from aeon.networks import EncoderNetwork
 
@@ -60,8 +58,6 @@ class EncoderClassifier(BaseDeepClassifier):
         The name of the file of the last model, if
         save_last_model is set to False, this parameter
         is discarded.
-    random_state : int, default = 0
-        Seed to any needed random actions.
 
     Notes
     -----
@@ -102,7 +98,6 @@ class EncoderClassifier(BaseDeepClassifier):
         verbose=False,
         loss="categorical_crossentropy",
         metrics=None,
-        random_state=None,
         use_bias=True,
         optimizer=None,
     ):
@@ -131,7 +126,6 @@ class EncoderClassifier(BaseDeepClassifier):
 
         super().__init__(
             batch_size=batch_size,
-            random_state=random_state,
             last_file_name=last_file_name,
         )
 
@@ -144,7 +138,6 @@ class EncoderClassifier(BaseDeepClassifier):
             padding=self.padding,
             dropout_proba=self.dropout_proba,
             activation=self.activation,
-            random_state=self.random_state,
         )
 
     def build_model(self, input_shape, n_classes, **kwargs):
@@ -167,8 +160,6 @@ class EncoderClassifier(BaseDeepClassifier):
         output : a compiled Keras Model
         """
         import tensorflow as tf
-
-        tf.random.set_seed(self.random_state)
 
         if self.metrics is None:
             metrics = ["accuracy"]
@@ -214,8 +205,6 @@ class EncoderClassifier(BaseDeepClassifier):
         y_onehot = self.convert_y_to_keras(y)
         # Transpose to conform to Keras input style.
         X = X.transpose(0, 2, 1)
-
-        check_random_state(self.random_state)
 
         self.input_shape = X.shape[1:]
         self.training_model_ = self.build_model(self.input_shape, self.n_classes_)

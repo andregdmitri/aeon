@@ -8,8 +8,6 @@ import os
 import time
 from copy import deepcopy
 
-from sklearn.utils import check_random_state
-
 from aeon.classification.deep_learning.base import BaseDeepClassifier
 from aeon.networks import FCNNetwork
 
@@ -43,8 +41,6 @@ class FCNClassifier(BaseDeepClassifier):
         The number of samples per gradient update.
     use_mini_batch_size : bool, default = False
         Whether or not to use the mini batch size formula.
-    random_state : int or None, default = None
-        Seed for random number generation.
     verbose : boolean, default = False
         Whether to output extra information.
     loss : string, default = "mean_squared_error"
@@ -115,7 +111,6 @@ class FCNClassifier(BaseDeepClassifier):
         verbose=False,
         loss="categorical_crossentropy",
         metrics=None,
-        random_state=None,
         use_bias=True,
         optimizer=None,
     ):
@@ -145,12 +140,10 @@ class FCNClassifier(BaseDeepClassifier):
 
         super().__init__(
             batch_size=batch_size,
-            random_state=random_state,
             last_file_name=last_file_name,
         )
 
         self._network = FCNNetwork(
-            random_state=self.random_state,
             n_layers=self.n_layers,
             kernel_size=self.kernel_size,
             n_filters=self.n_filters,
@@ -181,8 +174,6 @@ class FCNClassifier(BaseDeepClassifier):
         output : a compiled Keras Model
         """
         import tensorflow as tf
-
-        tf.random.set_seed(self.random_state)
 
         if self.metrics is None:
             metrics = ["accuracy"]
@@ -226,8 +217,6 @@ class FCNClassifier(BaseDeepClassifier):
         y_onehot = self.convert_y_to_keras(y)
         # Transpose to conform to Keras input style.
         X = X.transpose(0, 2, 1)
-
-        check_random_state(self.random_state)
 
         self.input_shape = X.shape[1:]
         self.training_model_ = self.build_model(self.input_shape, self.n_classes_)
