@@ -8,8 +8,6 @@ import os
 import time
 from copy import deepcopy
 
-from sklearn.utils import check_random_state
-
 from aeon.clustering.deep_learning.base import BaseDeepClusterer
 from aeon.networks import AEFCNNetwork
 
@@ -51,8 +49,6 @@ class AEFCNClusterer(BaseDeepClusterer):
         The number of samples per gradient update.
     use_mini_batch_size : bool, default = True,
         Whether or not to use the mini batch size formula.
-    random_state : int or None, default=None
-        Seed for random number generation.
     verbose : boolean, default = False
         Whether to output extra information.
     loss : string, default="mean_squared_error"
@@ -121,7 +117,6 @@ class AEFCNClusterer(BaseDeepClusterer):
         n_epochs=2000,
         batch_size=32,
         use_mini_batch_size=False,
-        random_state=0,
         verbose=False,
         loss="mse",
         optimizer="Adam",
@@ -152,7 +147,6 @@ class AEFCNClusterer(BaseDeepClusterer):
         self.save_best_model = save_best_model
         self.save_last_model = save_last_model
         self.best_file_name = best_file_name
-        self.random_state = random_state
 
         super().__init__(
             n_clusters=n_clusters,
@@ -173,7 +167,6 @@ class AEFCNClusterer(BaseDeepClusterer):
             padding=self.padding,
             activation=self.activation,
             use_bias=self.use_bias,
-            random_state=self.random_state,
         )
 
     def build_model(self, input_shape, **kwargs):
@@ -195,8 +188,6 @@ class AEFCNClusterer(BaseDeepClusterer):
         output : a compiled Keras Model.
         """
         import tensorflow as tf
-
-        tf.random.set_seed(self.random_state)
 
         encoder, decoder = self._network.build_network(input_shape, **kwargs)
 
@@ -233,8 +224,6 @@ class AEFCNClusterer(BaseDeepClusterer):
 
         # Transpose to conform to Keras input style.
         X = X.transpose(0, 2, 1)
-
-        check_random_state(self.random_state)
 
         self.input_shape = X.shape[1:]
         self.training_model_ = self.build_model(self.input_shape)

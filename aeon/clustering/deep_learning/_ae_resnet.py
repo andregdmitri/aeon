@@ -8,8 +8,6 @@ import os
 import time
 from copy import deepcopy
 
-from sklearn.utils import check_random_state
-
 from aeon.clustering.deep_learning.base import BaseDeepClusterer
 from aeon.networks import AEResNetNetwork
 
@@ -133,7 +131,6 @@ class AEResNetClusterer(BaseDeepClusterer):
         metrics=None,
         batch_size=32,
         use_mini_batch_size=False,
-        random_state=None,
         file_path="./",
         save_best_model=False,
         save_last_model=False,
@@ -155,7 +152,6 @@ class AEResNetClusterer(BaseDeepClusterer):
         self.metrics = metrics
         self.batch_size = batch_size
         self.use_mini_batch_size = use_mini_batch_size
-        self.random_state = random_state
         self.activation = activation
         self.use_bias = use_bias
         self.file_path = file_path
@@ -185,7 +181,6 @@ class AEResNetClusterer(BaseDeepClusterer):
             activation=self.activation,
             dilation_rate=self.dilation_rate,
             padding=self.padding,
-            random_state=random_state,
         )
 
     def build_model(self, input_shape, **kwargs):
@@ -207,8 +202,6 @@ class AEResNetClusterer(BaseDeepClusterer):
         output : a compiled Keras Model.
         """
         import tensorflow as tf
-
-        tf.random.set_seed(self.random_state)
 
         self.optimizer_ = (
             tf.keras.optimizers.Adam(learning_rate=0.01)
@@ -250,8 +243,6 @@ class AEResNetClusterer(BaseDeepClusterer):
 
         # Transpose to conform to Keras input style.
         X = X.transpose(0, 2, 1)
-
-        check_random_state(self.random_state)
 
         self.input_shape = X.shape[1:]
         self.training_model_ = self.build_model(self.input_shape)
